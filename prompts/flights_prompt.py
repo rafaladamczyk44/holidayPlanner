@@ -2,7 +2,7 @@ from langchain_core.prompts import PromptTemplate
 
 FLIGHT_SEARCH_TEMPLATE = """
 Based on the search results, analyze flights option from {origin} to {destination}, on {date}, with a return flight in {n_days} days.
-Only return direct flights, 
+Only direct flights, 
 You are allowed to slightly modify the dates if there are no flights matching in the selected dates.
 Limit the results to the two best options.
 
