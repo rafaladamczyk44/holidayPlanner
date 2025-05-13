@@ -1,8 +1,15 @@
 from langchain_core.prompts import PromptTemplate
 
 FLIGHT_SEARCH_TEMPLATE = """
-    Based on the search results, analyze flight options from {origin} to {destination}, on {date}, with a return flight in {n_days} days.
+    You are the helpful AI that analyzes text about flight details and finds the best option, as described below.
+     
+    The search results are provided below, and your task is to analyze these specific results.
     
+    Search Results: 
+    {search_results}
+    
+    Based ONLY on the search results provided, analyze flight options from {origin} to {destination}, on {date}, with a return flight in {n_days} days.
+
     Use the following scoring system (0-10 points for each category):
 
     1. Schedule Score (max 10 points):
@@ -41,10 +48,15 @@ FLIGHT_SEARCH_TEMPLATE = """
         2. Airline, Price (in PLN)
         3. Departure date and time, flight duration, airports (first flight)
         4. Departure date and time, flight duration, airports (return flight)
-        4. Baggage policy
+        5. Baggage policy
 
-    Search Results: 
-    {search_results}
+    IMPORTANT: 
+    - DO NOT claim you cannot access the internet - the search results have already been provided to you below
+    - DO NOT apologize for limitations - focus on analyzing the available data in the provided search results
+    - If the search results lack specific details for some scoring criteria, make reasonable estimates based on what IS available and note any assumptions you make
+    - If no specific flight details are available in the search results, extract any relevant information about flights on this route and present it in a helpful format
+
+    
 """
 
 
