@@ -1,20 +1,66 @@
 from langchain_core.prompts import PromptTemplate
 
 ACCOMMODATION_SEARCH_TEMPLATE = """
-Your task it to find the best accommodation in the {destination}, on {date}, for {n_days} nights.
-The best place is the one that passes all the checks:
-1. It is clode to the city centre or to the tourist area, so that all attractions or activites are a short walk/commute from it
-2. You should focus on apartments first, then hotels and then rooms or hostels
-3. You always look at the cheapest first, if it follows all the rules, this is the one.
+Analyze accommodation options in {destination} for a stay starting on {date} for {n_days} nights.
+    
+Use the following scoring system (0-10 points for each category):
 
-Provide a structured analysis of the best accommodations in the following format:
-1. Price per person per night
-2. Area
-3. Type of objcet
-4. Check-in, check-out hours
-5. Summarized description of the place (50 words max)
+1. Location Score (max 10 points):
+    - Distance from city center/main attractions:
+        * Walking distance (under 15 min): 10 points
+        * Short public transport ride (under 20 min): 7 points
+        * Longer commute: 3-5 points
+    - Area safety and convenience:
+        * Safe, well-lit area with amenities: +2 points
+        * Limited amenities or concerns: -2 points
 
-Return the information in a clear, organized manner. Please use PLN as a currency
+2. Accommodation Type Score (max 10 points):
+    - Apartment (entire place): 10 points
+    - Hotel (private room with facilities): 8 points
+    - Shared apartment (private room): 6 points
+    - Hostel (private room): 4 points
+    - Shared room: 2 points
+    Plus additional points for:
+        * Private bathroom: +1 point
+        * Kitchen facilities: +1 point
+        * Working space: +1 point
+
+3. Value Score (max 10 points):
+    - Price per night (compared to area average):
+        * Below average: 8-10 points
+        * Average: 5-7 points
+        * Above average: 1-4 points
+    Adjusted by:
+        * Included breakfast: +1 point
+        * Free cancellation: +1 point
+        * Additional fees: -1 point per fee
+
+4. Quality Score (max 10 points):
+    - Guest ratings conversion:
+        * 9.0-10.0: 10 points
+        * 8.0-8.9: 8 points
+        * 7.0-7.9: 6 points
+        * Below 7.0: 0-4 points
+    - Recent reviews sentiment:
+        * Consistently positive: +1 point
+        * Mixed reviews: +0 points
+        * Consistent issues: -1 point
+
+Calculate final score as weighted average:
+    - Location Score: 35%
+    - Accommodation Type Score: 25%
+    - Value Score: 25%
+    - Quality Score: 15%
+
+Return the top three accommodations with highest total scores. For each provide:
+    1. Total Score (out of 10)
+    2. Price per night (in PLN)
+    3. Type of accommodation and key features
+    4. Exact location and distance to main attractions
+    5. Check-in/check-out times
+    6. Brief description (max 50 words)
+    7. Score breakdown by category
+
 Search Results:
 {search_results}
 """
@@ -30,3 +76,5 @@ def get_accomodation_search_prompt() -> PromptTemplate:
         template=ACCOMMODATION_SEARCH_TEMPLATE,
     )
     return prompt
+
+
