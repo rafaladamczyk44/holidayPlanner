@@ -5,8 +5,8 @@ from typing import Optional
 
 from langchain_ollama import OllamaLLM
 from langchain_google_community import GoogleSearchAPIWrapper
-from prompts.flights_prompt import get_flight_search_prompt
-from prompts.accomodation_prompt import get_accomodation_search_prompt
+
+from prompt_manager import PromptManager
 
 dotenv.load_dotenv('config.env')
 
@@ -29,15 +29,15 @@ class HolidayPlanAssistant:
         # Using phi-3-mini
         self.llm = OllamaLLM(
             model=MODEL_SELECTION,
-            temperature=0.3,
+            temperature=0.6,
             top_p=0.9,
             repeat_penalty=1.1,
             num_predict=512,
         )
 
         # Prompts
-        self.flight_search_prompt = get_flight_search_prompt()
-        self.accommodation_prompt = get_accomodation_search_prompt()
+        self.prompt_manager = PromptManager()
+
 
     def search_queries(self, search_q) -> Optional[str]:
         """
@@ -65,8 +65,6 @@ class HolidayPlanAssistant:
 
     def search_flights(self, origin:str, destination:str, date:str, n_days:int) -> str:
         """
-        Ask agent to return list of the best fitting flights in given dates based on a scoring system
-        (Price, how close it is to the selected dates, baggage policy).
         Args:
             origin (str): Origin city
             destination (str): Destination city
@@ -84,7 +82,10 @@ class HolidayPlanAssistant:
 
         combined_results = self.search_queries(search_queries)
 
-        chain = self.flight_search_prompt | self.llm
+        prompt = self.prompt_manager.return_prompt('flight')
+
+        chain = prompt | self.llm
+
         agent_response = chain.invoke({
             "origin": origin,
             "destination": destination,
@@ -92,5 +93,6 @@ class HolidayPlanAssistant:
             "n_days": n_days,
             "search_results": combined_results
         })
+
         return agent_response
 
